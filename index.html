@@ -1,1 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>8th Monthsary - Solar System</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+      font-family: 'Segoe UI', sans-serif;
+    }
 
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
+
+    /* Sun */
+    .sun {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 100px; height: 100px;
+      margin-left: -50px; margin-top: -50px;
+      background: radial-gradient(circle, #ffd700, #ff8c00, #ff4500);
+      border-radius: 50%;
+      box-shadow: 0 0 40px #ffae00, 0 0 80px #ff6600;
+      z-index: 2;
+    }
+
+    /* Orbits */
+    .orbit {
+      position: absolute;
+      top: 50%; left: 50%;
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Planets */
+    .planet {
+      position: absolute;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .mercury { width: 10px; height: 10px; background: gray; }
+    .venus   { width: 15px; height: 15px; background: #e0c16c; }
+    .earth   { width: 18px; height: 18px; background: radial-gradient(circle, #2e86de, #145a32); }
+    .mars    { width: 12px; height: 12px; background: #b22222; }
+    .jupiter { width: 35px; height: 35px; background: linear-gradient(#d2b48c, #8b4513); }
+    .saturn  { width: 30px; height: 30px; background: #f4a460; }
+    .uranus  { width: 20px; height: 20px; background: #40e0d0; }
+    .neptune { width: 20px; height: 20px; background: #4169e1; }
+
+    /* Popup modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 5;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      color: black;
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 300px;
+      text-align: center;
+      box-shadow: 0 0 20px #fff;
+      animation: pop 0.3s ease-out;
+    }
+
+    @keyframes pop {
+      from { transform: scale(0.7); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .close {
+      cursor: pointer;
+      color: red;
+      font-weight: bold;
+      float: right;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="starfield"></canvas>
+
+  <!-- Sun -->
+  <div class="sun"></div>
+
+  <!-- Orbits + Planets -->
+  <div class="orbit" style="width:150px; height:150px;">
+    <div class="planet mercury" data-message="Mercury (Month 1): The day our story began 💕"></div>
+  </div>
+  <div class="orbit" style="width:200px; height:200px;">
+    <div class="planet venus" data-message="Venus (Month 2): You brighten my world ✨"></div>
+  </div>
+  <div class="orbit" style="width:260px; height:260px;">
+    <div class="planet earth" data-message="Earth (Month 3): My home is with you 🌍"></div>
+  </div>
+  <div class="orbit" style="width:320px; height:320px;">
+    <div class="planet mars" data-message="Mars (Month 4): Your love is my fire 🔥"></div>
+  </div>
+  <div class="orbit" style="width:420px; height:420px;">
+    <div class="planet jupiter" data-message="Jupiter (Month 5): My biggest joy is you 💖"></div>
+  </div>
+  <div class="orbit" style="width:500px; height:500px;">
+    <div class="planet saturn" data-message="Saturn (Month 6): My endless ring of love 💍"></div>
+  </div>
+  <div class="orbit" style="width:580px; height:580px;">
+    <div class="planet uranus" data-message="Uranus (Month 7): You make life magical ❄️"></div>
+  </div>
+  <div class="orbit" style="width:650px; height:650px;">
+    <div class="planet neptune" data-message="Neptune (Month 8): My deepest love is for you 🌊💞"></div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <span class="close" id="closeBtn">&times;</span>
+      <p id="modalMessage"></p>
+    </div>
+  </div>
+
+  <script>
+    // Starry background with twinkle
+    const canvas = document.getElementById("starfield");
+    const ctx = canvas.getContext("2d");
+    let stars = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    for (let i = 0; i < 200; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 2,
+        speed: Math.random() * 0.5 + 0.2,
+        opacity: Math.random(),
+        twinkleSpeed: Math.random() * 0.02 + 0.01
+      });
+    }
+
+    function animateStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(star => {
+        star.opacity += star.twinkleSpeed * (Math.random() < 0.5 ? -1 : 1);
+        if (star.opacity < 0.1) star.opacity = 0.1;
+        if (star.opacity > 1) star.opacity = 1;
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        star.y += star.speed;
+        if (star.y > canvas.height) star.y = 0;
+      });
+      requestAnimationFrame(animateStars);
+    }
+    animateStars();
+
+    // Orbit rotation
+    const orbits = document.querySelectorAll(".orbit");
+    function rotatePlanets() {
+      let speed = [0.02, 0.015, 0.012, 0.01, 0.007, 0.005, 0.003, 0.002]; // each planet different speed
+      orbits.forEach((orbit, i) => {
+        let angle = (Date.now() * speed[i]) / 50;
+        let planet = orbit.querySelector(".planet");
+        let radius = orbit.offsetWidth / 2;
+        let x = Math.cos(angle) * radius;
+        let y = Math.sin(angle) * radius;
+        planet.style.transform = `translate(${x + orbit.offsetWidth/2 - planet.offsetWidth/2}px, ${y + orbit.offsetHeight/2 - planet.offsetHeight/2}px)`;
+      });
+      requestAnimationFrame(rotatePlanets);
+    }
+    rotatePlanets();
+
+    // Modal functionality
+    const modal = document.getElementById("modal");
+    const modalMessage = document.getElementById("modalMessage");
+    const closeBtn = document.getElementById("closeBtn");
+
+    document.querySelectorAll(".planet").forEach(planet => {
+      planet.addEventListener("click", () => {
+        modalMessage.textContent = planet.getAttribute("data-message");
+        modal.style.display = "flex";
+      });
+    });
+
+    closeBtn.addEventListener("click", () => {
+      modal.style.display = "none";
+    });
+
+    window.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>
